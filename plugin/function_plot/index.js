@@ -33,12 +33,13 @@ class FunctionPlotPlugin extends BasePlugin {
 
   create = ($wrap, content, meta) => {
     const options = this._toOptions(content)
-    return this.driver().create($wrap[0], options)
+    const plot = this.driver()
+    return plot.create($wrap[0], options)
   }
 
-  update = ($wrap, content, instance) => {
+  update = ($wrap, content, plot) => {
     const options = this._toOptions(content)
-    instance.update(options)
+    plot.update(options)
   }
 
   _toOptions = (content) => {
@@ -47,7 +48,7 @@ class FunctionPlotPlugin extends BasePlugin {
     return options
   }
 
-  destroy = instance => instance.destroy()
+  destroy = plot => plot.destroy()
 
   lazyLoad = () => this.driver = require("./factory.js")
 

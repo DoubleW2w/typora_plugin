@@ -3698,7 +3698,7 @@ const Control_Select = {
       if (Array.isArray(value)) {
         if (optionEl.dataset.choose === "true") {
           const idx = value.indexOf(toggleOptionKey)
-          commitValue = value.toSpliced(idx, 1)
+          commitValue = [...value.slice(0, idx), ...value.slice(idx + 1)]
         } else {
           commitValue = [...value, toggleOptionKey]
         }
@@ -3745,7 +3745,9 @@ const Control_Segment = {
       let nextValue = clickedValue
       if (Array.isArray(currentValue)) {
         const idx = currentValue.map(String).indexOf(clickedValue)
-        nextValue = idx > -1 ? currentValue.toSpliced(idx, 1) : [...currentValue, clickedValue]
+        nextValue = idx > -1
+          ? [...currentValue.slice(0, idx), ...currentValue.slice(idx + 1)]
+          : [...currentValue, clickedValue]
       } else {
         if (String(currentValue) === clickedValue) return
       }
@@ -3774,7 +3776,9 @@ const Control_ModifierKey = {
       const clicked = this.dataset.value
       const current = String(form.getData(key) || "").toLowerCase().split("+").map(s => s.trim()).filter(Boolean)
       const idx = current.indexOf(clicked)
-      const next = idx > -1 ? current.toSpliced(idx, 1) : [...current, clicked]
+      const next = idx > -1
+        ? [...current.slice(0, idx), ...current.slice(idx + 1)]
+        : [...current, clicked]
       const nextValue = Object.keys(Control_ModifierKey.MODIFIERS).filter(k => next.includes(k)).join("+")
       form.reactiveCommit(key, nextValue)
     })

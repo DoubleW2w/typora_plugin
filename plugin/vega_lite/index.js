@@ -45,7 +45,9 @@ class VegaLitePlugin extends BasePlugin {
 
   lazyLoad = async () => {
     for (const lib of ["vega", "vega_lite", "vega_embed"]) {
-      await this.utils.insertScript(this.config.RESOURCE_URI[lib])
+      const uri = this.config.RESOURCE_URI[lib]
+      const path = this.utils.isNetworkURI(uri) ? uri : this.utils.toFileProtocol(this.utils.Package.Path.resolve(uri))
+      await $.getScript(path)
     }
   }
 }

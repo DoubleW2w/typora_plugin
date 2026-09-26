@@ -267,21 +267,21 @@ class MarkdownlintPlugin extends BasePlugin {
       }
     }
     const getParsers = () => {
-      const toIntOrIntArray = val => {
-        if (!isNaN(val)) {
-          return Number(val)
+      const toNumberOrNumberArray = (value) => {
+        if (!isNaN(value)) {
+          return Number(value)
         }
         try {
-          return JSON.parse(`[${val}]`).flat()  // supports: [1,2,3] or 1,2,3
+          return JSON.parse(`[${value}]`).flat()  // supports: [1,2,3] or 1,2,3
         } catch (err) {
           console.error(err)
         }
-        return val
+        return value
       }
       return {
         "extends": val => val.trim(),
-        "MD022.lines_above": toIntOrIntArray,
-        "MD022.lines_below": toIntOrIntArray,
+        "MD022.lines_above": toNumberOrNumberArray,
+        "MD022.lines_below": toNumberOrNumberArray,
       }
     }
     const getActions = () => ({

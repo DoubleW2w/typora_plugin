@@ -64,7 +64,7 @@ English | [简体中文](https://github.com/obgnail/typora_plugin/blob/master/RE
 | [markmap](#markmap)             | Integrates Markmap       |         |
 | [echarts](#echarts)             | Integrates ECharts       |         |
 | [chart](#chart)                 | Integrates Chart.js      |         |
-| [vega_lite](#vega_lite)         | Integrates Vega-Lite     |         |
+| [vega-lite](#vega-lite)         | Integrates Vega-Lite     |         |
 | [drawIO](#drawIO)               | Integrates DrawIO        |         |
 | [abc](#abc)                     | Integrates abc.js        |         |
 | [calendar](#calendar)           | Integrates tui.calendar  |         |
@@ -358,7 +358,7 @@ Provides a document security module based on standard cryptographic algorithms, 
 <td width="33.33%" align="center"><a id="markmap"><b>Markmap</b></a><br><img src="./assets/markmap.png" width="100%"></td>
 </tr>
 <tr>
-<td width="33.33%" align="center"><a id="vega_lite"><b>Vega-Lite</b></a><br><img src="./assets/vega_lite.png" width="100%"></td>
+<td width="33.33%" align="center"><a id="vega-lite"><b>Vega-Lite</b></a><br><img src="./assets/vega_lite.png" width="100%"></td>
 <td width="33.33%" align="center"><a id="plantUML"><b>PlantUML</b></a><br><img src="./assets/plantUML.png" width="100%"></td>
 <td width="33.33%" align="center"><a id="drawIO"><b>Draw.io</b></a><br><img src="./assets/drawIO.png" width="100%"></td>
 </tr>

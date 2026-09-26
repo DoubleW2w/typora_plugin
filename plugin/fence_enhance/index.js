@@ -292,7 +292,7 @@ class ButtonHelper {
     const evalFn = fnString => {
       const fn = this.utils.safeEval(fnString)
       if (typeof fn !== "function") {
-        throw new Error(`custom button param is not function: ${fnString}`)
+        throw Error(`custom button param is not function: ${fnString}`)
       }
       return fn
     }
@@ -419,7 +419,7 @@ class HotkeyHelper {
       if (DISABLE || !HOTKEY || !CALLBACK) return
       const fn = this.utils.safeEval(CALLBACK)
       if (typeof fn !== "function") {
-        throw new Error(`CALLBACK param is not function: ${CALLBACK}`)
+        throw Error(`CALLBACK param is not function: ${CALLBACK}`)
       }
       hotkeys[HOTKEY] = () => fn(this.getFocusedFence())
     })

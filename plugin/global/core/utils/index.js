@@ -34,7 +34,9 @@ class utils {
   static supportHasSelector = CSS.supports("selector(:has(*))")
   static tempFolder = window._options.tempPath || require("os").tmpdir()
   static Package = Object.freeze({ Path: PATH, FsExtra: FS_EXTRA, Util: UTIL })
-  static mixins = Object.fromEntries(Object.entries(MIXINS).map(([name, cls]) => [[name], new cls(this, i18n)]))
+  static mixins = Object.fromEntries(
+    Object.entries(MIXINS).map(([name, cls]) => [[name], new cls(this, i18n)]),
+  )
 
   static PLUGIN_LOAD_ABORT = Symbol.for("plugin:load-abort")  // For plugins prepare method; return this to stop loading the plugin
 
@@ -358,7 +360,7 @@ class utils {
 
   static asyncReplaceAll = (text, regex, replaceFn) => {
     if (!regex.global) {
-      throw new Error("Called with a non-global RegExp argument")
+      throw Error("Called with a non-global RegExp argument")
     }
 
     let match
@@ -411,8 +413,7 @@ class utils {
       s: () => date.getSeconds().toString(),
       SSS: () => date.getMilliseconds().toString().padStart(3, "0"),
       S: () => date.getMilliseconds().toString(),
-      a: () => new Intl.DateTimeFormat(locale, { hour: "numeric", hour12: true })
-        .formatToParts(date).find(part => part.type === "dayPeriod")?.value || "",
+      a: () => new Intl.DateTimeFormat(locale, { hour: "numeric", hour12: true }).formatToParts(date).find(part => part.type === "dayPeriod")?.value || "",
     }
     const regex = /(yyyy|yyy|yy|MMMM|MMM|MM|M|dddd|ddd|dd|d|HH|H|hh|h|mm|m|ss|s|SSS|S|a)/g
     return format.replace(regex, match => fns[match]?.() ?? match)
@@ -624,8 +625,6 @@ class utils {
     el.href = this.toFileProtocol(this.joinPluginPath(href))
     document.head.append(el)
   }
-
-  static insertScript = async (uri) => $.getScript(this.isNetworkURI(uri) ? uri : this.toFileProtocol(PATH.resolve(uri)))
 
   static newFilePath = async filename => {
     filename = filename || File.getFileName() || Date.now() + ".md"
@@ -1036,6 +1035,16 @@ class utils {
     cm.setCursor(cursor)
   }
 
+  // content: \n represents a soft line break; \n\n represents a hard line break
+  static insertText = (anchorNode, content, restoreLastCursor = true) => {
+    if (restoreLastCursor) {
+      File.editor.contextMenu.hide()
+      // File.editor.writingArea.focus()
+      File.editor.restoreLastCursor()
+    }
+    File.editor.insertText(content)
+  }
+
   static createFragment = els => {
     if (!els) return null
     if (typeof els === "string") {
@@ -1056,33 +1065,30 @@ class utils {
     if (frag) document.getElementById("typora-quick-open").after(frag)
   }
 
+  /** Backup before `File.editor.stylize.toggleFences()` as it uses `File.option` to set block code language. Restore after. */
   static insertFence = (lang = "") => {
-    const op = File.option
-    const backup = this.pick(op, ["default-code-lang", "defaultCodeLang", "DefaultCodeLangOptionMenu", "defaultCodeLangOption"])
+    const lang1_ = File.option["default-code-lang"]  // Used for old versions
+    const lang2_ = File.option.defaultCodeLang  // Used for new versions
+    const menu_ = File.option.DefaultCodeLangOptionMenu
+    const op_ = File.option.defaultCodeLangOption
+
+    File.option["default-code-lang"] = lang
+    File.option.defaultCodeLang = lang
+    File.option.DefaultCodeLangOptionMenu = 1
+    File.option.defaultCodeLangOption = 1
     try {
-      op["default-code-lang"] = lang
-      op.defaultCodeLang = lang
-      op.DefaultCodeLangOptionMenu = 1
-      op.defaultCodeLangOption = 1
       File.editor.stylize.toggleFences()
     } finally {
-      Object.assign(op, backup)
+      File.option["default-code-lang"] = lang1_
+      File.option.defaultCodeLang = lang2_
+      File.option.DefaultCodeLangOptionMenu = menu_
+      File.option.defaultCodeLangOption = op_
     }
   }
 
   static insertBlockCode = (anchorNode, lang, content) => {
     const cnt = ["```", lang, "\n", content, "\n", "```"].join("")
     this.insertText(anchorNode, cnt)
-  }
-
-  // content: \n represents a soft line break; \n\n represents a hard line break
-  static insertText = (anchorNode, content, restoreLastCursor = true) => {
-    if (restoreLastCursor) {
-      File.editor.contextMenu.hide()
-      // File.editor.writingArea.focus()
-      File.editor.restoreLastCursor()
-    }
-    File.editor.insertText(content)
   }
 
   static getRangy = () => {

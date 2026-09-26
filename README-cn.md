@@ -64,7 +64,7 @@
 | :------------------------------ | :----------------- | :------- |
 | [markmap](#markmap)             | 集成 Markmap       |          |
 | [echarts](#echarts)             | 集成 Echarts       |          |
-| [vega-lite](#vega-lite)         | 集成 Vega-Lite     |          |
+| [vega_lite](#vega_lite)         | 集成 Vega-Lite     |          |
 | [chart](#chart)                 | 集成 Chart.js      |          |
 | [drawIO](#drawIO)               | 集成 DrawIO        |          |
 | [abc](#abc)                     | 集成 abc.js        |          |
@@ -359,7 +359,7 @@ Markdown 规范分析器。检测偏离最佳实践规范的语法并提供自�
 <td width="33.33%" align="center"><a id="markmap"><b>Markmap</b></a><br><img src="./assets/markmap.png" width="100%"></td>
 </tr>
 <tr>
-<td width="33.33%" align="center"><a id="vega-lite"><b>Vega-Lite</b></a><br><img src="./assets/vega_lite.png" width="100%"></td>
+<td width="33.33%" align="center"><a id="vega_lite"><b>Vega-Lite</b></a><br><img src="./assets/vega_lite.png" width="100%"></td>
 <td width="33.33%" align="center"><a id="plantUML"><b>PlantUML</b></a><br><img src="./assets/plantUML.png" width="100%"></td>
 <td width="33.33%" align="center"><a id="drawIO"><b>Draw.io</b></a><br><img src="./assets/drawIO.png" width="100%"></td>
 </tr>

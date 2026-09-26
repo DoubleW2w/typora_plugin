@@ -23,19 +23,19 @@ const parseTables = content => {
 }
 
 test("table style state resolves per-table overrides without changing global defaults", () => {
-  const globalDefaults = { header: true, firstColumn: false, nowrap: false, autoWidth: true };
-  const overrides = { header: "inherit", firstColumn: "on", nowrap: "on", autoWidth: "off" };
+  const globalDefaults = { header: true, firstColumn: false, nowrap: false };
+  const overrides = { header: "inherit", firstColumn: "on", nowrap: "on" };
   assert.deepEqual(
     resolveEffectiveOverrides(globalDefaults,overrides),
-    { header: true, firstColumn: true, nowrap: true, autoWidth: false },
+    { header: true, firstColumn: true, nowrap: true },
   )
 
   assert.deepEqual(
     resolveEffectiveOverrides(globalDefaults, { header: "off" }),
-    { header: false, firstColumn: false, nowrap: false, autoWidth: true },
+    { header: false, firstColumn: false, nowrap: false },
   )
   
-  assert.deepEqual(globalDefaults, { header: true, firstColumn: false, nowrap: false, autoWidth: true });
+  assert.deepEqual(globalDefaults, { header: true, firstColumn: false, nowrap: false });
 })
 
 test("table style state restores duplicate tables only when the document is unchanged", () => {

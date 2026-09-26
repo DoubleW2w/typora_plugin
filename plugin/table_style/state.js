@@ -1,7 +1,7 @@
 const crypto = require("crypto")
 
 const MODE = Object.freeze({ INHERIT: "inherit", ON: "on", OFF: "off" })
-const FEATURES = Object.freeze(["header", "firstColumn", "nowrap", "autoWidth"])
+const FEATURES = Object.freeze(["header", "firstColumn", "nowrap"])
 
 const normalize = content => String(content || "").replace(/\r\n?/g, "\n").trim()
 const hash = content => crypto.createHash("sha256").update(content).digest("hex")
@@ -14,15 +14,15 @@ const extractTableRecords = (content, parseBlock) => {
     .filter(token => token.type === "table_open" && Array.isArray(token.map))
     .map((token, index) => {
       const table = normalize(lines.slice(token.map[0], token.map[1]).join("\n"))
-      return { index, signature: table, fingerprint: hash(table) }
+      return { index, fingerprint: hash(table) }
     })
 }
 
 const hasOverrides = overrides => FEATURES.some(feature => overrides?.[feature] && overrides[feature] !== MODE.INHERIT)
 
-const createFileState = (content, records, overridesByIndex) => ({
+const createFileState = (content, records, overridesByIndex, documentFingerprint = getDocumentFingerprint(content)) => ({
   version: 1,
-  documentFingerprint: getDocumentFingerprint(content),
+  documentFingerprint,
   // Keep multiplicity without retaining every table's source text; duplicate fingerprints must not migrate overrides after edits.
   signatureCounts: records.reduce((counts, record) => {
     counts[record.fingerprint] = (counts[record.fingerprint] || 0) + 1
@@ -56,7 +56,7 @@ const createFileState = (content, records, overridesByIndex) => ({
  *   A map from table index to overrides for tables that should be restored.
  *   If no overrides can be restored, returns an empty Map.
  */
-const restoreOverrides = (content, records, state) => {
+const restoreOverrides = (content, records, state, documentFingerprint = getDocumentFingerprint(content)) => {
   // Guard against invalid or missing state.
   if (!state || state.version !== 1 || !state.signatureCounts || !Array.isArray(state.tables)) return new Map()
 
@@ -64,7 +64,7 @@ const restoreOverrides = (content, records, state) => {
   const restored = new Map()
 
   // Compare the saved document fingerprint with the current one.
-  const isSameDocument = state.documentFingerprint === getDocumentFingerprint(content)
+  const isSameDocument = state.documentFingerprint === documentFingerprint
 
   // --- Case A: same document ---
   if (isSameDocument) {

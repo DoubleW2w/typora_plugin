@@ -285,7 +285,7 @@ Dynamically adjust table row height and column width via `Ctrl + Mouse Drag` int
 
 ### table_style
 
-Adds optional first-row and first-column styling, non-wrapping table headers, and adaptive table width. Global defaults are configured in Preferences; right-click inside a table to cycle that table's independent `Follow Global`, `On`, and `Off` overrides. Overrides are stored locally and never modify Markdown source.
+Adds optional first-row and first-column styling and non-wrapping table headers. Global defaults are configured in Preferences; right-click inside a table to cycle that table's independent `Follow Global`, `On`, and `Off` overrides. Overrides are stored locally and never modify Markdown source.
 
 ### resize_image
 

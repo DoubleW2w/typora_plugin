@@ -354,7 +354,6 @@ const schema_table_style = () => [
     Switch("FIRST_COLUMN_STYLE"),
     Text("FIRST_COLUMN_BACKGROUND_COLOR"),
     Switch("HEADER_NOWRAP"),
-    Switch("AUTO_WIDTH"),
   ),
   FRAG.SettingHandler(),
 ]

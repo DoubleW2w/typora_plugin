@@ -30,7 +30,6 @@ const makePlugin = () => {
     HEADER_STYLE: false,
     FIRST_COLUMN_STYLE: false,
     HEADER_NOWRAP: false,
-    AUTO_WIDTH: false,
     HEADER_BACKGROUND_COLOR: "rgba(0, 0, 0, .06)",
     FIRST_COLUMN_BACKGROUND_COLOR: "rgba(0, 0, 0, .03)",
   }
@@ -66,7 +65,6 @@ test("applies global table styles to the current document during startup", () =>
   plugin.config.HEADER_NOWRAP = true
   plugin.utils = {
     getStorage: () => ({ get: () => undefined, set: () => {} }),
-    stateRecorder: { register: () => {} },
     eventHub: {
       eventType: { beforeFileOpen: "beforeFileOpen", fileContentLoaded: "fileContentLoaded" },
       on: () => {},
@@ -82,22 +80,6 @@ test("applies global table styles to the current document during startup", () =>
   assert.ok(table.classList.contains("plugin-table-style-header-on"))
   assert.ok(table.classList.contains("plugin-table-style-first-column-on"))
   assert.ok(table.classList.contains("plugin-table-style-nowrap-on"))
-})
-
-test("keeps manually resized table widths ahead of auto width CSS", () => {
-  const plugin = makePlugin()
-  assert.match(plugin.style(), /auto-width-on:not\(\[style\*="width"\]\)/)
-})
-
-test("does not apply adaptive width to a table with manually resized cells", () => {
-  document.querySelector("#write").innerHTML = "<table class=\"md-table\"><thead><tr><th>H</th></tr></thead><tbody><tr><td style=\"width: 120px\">A</td></tr></tbody></table>"
-  const plugin = makePlugin()
-  plugin.config.AUTO_WIDTH = true
-  const table = document.querySelector("table")
-
-  plugin._setOverrides(table, {})
-
-  assert.ok(!table.classList.contains("plugin-table-style-auto-width-on"))
 })
 
 test("restores an explicit table override from local storage after reload", () => {

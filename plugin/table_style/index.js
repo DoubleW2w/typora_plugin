@@ -2,25 +2,23 @@ const {
   MODE, FEATURES, extractTableRecords, createFileState, getDocumentFingerprint, hasOverrides, restoreOverrides, resolveEffectiveOverrides,
 } = require("./state")
 
-const ACTIONS = Object.freeze({ header: "cycle_header", firstColumn: "cycle_first_column", nowrap: "cycle_nowrap", autoWidth: "cycle_auto_width" })
+const ACTIONS = Object.freeze({ header: "cycle_header", firstColumn: "cycle_first_column", nowrap: "cycle_nowrap" })
 const CLASS_PREFIX = "plugin-table-style-"
 
 class TableStylePlugin extends BasePlugin {
   overrides = new WeakMap()
   storage = null
-  // Reused by StateRecorder callbacks so one file-switch event parses Markdown only once.
+  // Reused by save/restore callbacks so one file-switch event parses Markdown only once.
   stateSnapshot = null
 
   style = () => `
 #write table.md-table.${CLASS_PREFIX}header-on > thead > tr > th { background-color: ${this.config.HEADER_BACKGROUND_COLOR}; font-weight: 700; }
 #write table.md-table.${CLASS_PREFIX}first-column-on > tbody > tr > td:first-child { background-color: ${this.config.FIRST_COLUMN_BACKGROUND_COLOR}; font-weight: 600; }
 #write table.md-table.${CLASS_PREFIX}nowrap-on > thead > tr > th { white-space: nowrap; }
-#write table.md-table.${CLASS_PREFIX}auto-width-on:not([style*="width"]) { width: 100%; table-layout: auto; }
 `
 
   process = () => {
     this.storage = this.utils.getStorage(`${this.fixedName}.data`)
-    this._registerStateRecorder()
     // Save old-table overrides while its file path and DOM nodes are still current.
     this.utils.eventHub.on(this.utils.eventHub.eventType.beforeFileOpen, this._persistCurrentFile)
     // Reapply saved overrides only after the new file has rendered its table DOM.
@@ -67,14 +65,9 @@ class TableStylePlugin extends BasePlugin {
     this.overrides.set(table, overrides)
     // Determine the effective overrides by combining the global defaults with the table-specific overrides.
     const effective = resolveEffectiveOverrides(this._getGlobalDefaults(), overrides)
-    // Check if the table already has a manual width set (via inline style).
-    const hasManualWidth = Boolean(table.querySelector('th[style*="width"], td[style*="width"]'))
-     // Iterate over all 4 features and toggle their CSS classes accordingly.
+    // Iterate over all features and toggle their CSS classes accordingly.
     FEATURES.forEach(feature => {
-      // The autoWidth feature is suppressed when a manual width exists to avoid conflicting layout rules.
-      const enabled = effective[feature] && (feature !== "autoWidth" || !hasManualWidth)
-      // Add or remove the class based on the enabled state.
-      table.classList.toggle(`${CLASS_PREFIX}${this._toClassName(feature)}-on`, enabled)
+      table.classList.toggle(`${CLASS_PREFIX}${this._toClassName(feature)}-on`, effective[feature])
     })
   }
 
@@ -84,14 +77,15 @@ class TableStylePlugin extends BasePlugin {
     header: this.config.HEADER_STYLE,
     firstColumn: this.config.FIRST_COLUMN_STYLE,
     nowrap: this.config.HEADER_NOWRAP,
-    autoWidth: this.config.AUTO_WIDTH,
   })
 
   _getCurrentDocument = () => {
     const content = this.utils.getCurrentFileContent()
     const records = extractTableRecords(content, this.utils.parseMarkdownBlock)
     const tables = Array.from(document.querySelectorAll("#write table.md-table"))
-    return records.length === tables.length ? { content, records, tables } : null
+    return records.length === tables.length
+      ? { content, records, tables, documentFingerprint: getDocumentFingerprint(content) }
+      : null
   }
 
   /**
@@ -117,7 +111,7 @@ class TableStylePlugin extends BasePlugin {
 
     // Create the file state object to be persisted. It only keeps tables
     // that actually have overrides, skipping untouched ones.
-    const state = createFileState(documentState.content, documentState.records, overrides)
+    const state = createFileState(documentState.content, documentState.records, overrides, documentState.documentFingerprint)
 
     // Read the existing storage (all files).
     const all = this._readStorage()
@@ -140,37 +134,10 @@ class TableStylePlugin extends BasePlugin {
     const documentState = this._getStateSnapshot()
     if (!documentState) return
     const state = this._readStorage().files[this._normalizePath(filepath)]
-    const overrides = restoreOverrides(documentState.content, documentState.records, state)
+    const overrides = restoreOverrides(documentState.content, documentState.records, state, documentState.documentFingerprint)
     documentState.tables.forEach((table, index) => this._setOverrides(table, overrides.get(index) || this.getOverrides(table)))
     this.stateSnapshot = null
   }
-
-  _registerStateRecorder = () => this.utils.stateRecorder.register({
-    name: this.fixedName,
-    selector: "#write table.md-table",
-    stateGetter: table => {
-      const documentState = this._getStateSnapshot()
-      const index = documentState?.tables.indexOf(table)
-      const overrides = this.getOverrides(table)
-      if (index === -1 || !documentState || !hasOverrides(overrides)) return
-      return JSON.stringify({
-        documentFingerprint: getDocumentFingerprint(documentState.content),
-        fingerprint: documentState.records[index].fingerprint,
-        overrides,
-      })
-    },
-    stateRestorer: (table, value) => {
-      try {
-        const saved = JSON.parse(value)
-        const documentState = this._getStateSnapshot()
-        if (!documentState) return
-        const index = documentState?.tables.indexOf(table)
-        const current = index === -1 ? null : documentState.records[index]
-        const currentFingerprint = getDocumentFingerprint(documentState.content)
-        if (current && current.fingerprint === saved.fingerprint && currentFingerprint === saved.documentFingerprint) this._setOverrides(table, saved.overrides)
-      } catch (_) {}
-    },
-  })
 
   _normalizePath = filepath => process.platform === "win32" ? filepath.toLowerCase() : filepath
 
